@@ -46,6 +46,7 @@ class ENV(gym.Env):
         )
 
         self.seq_time = 480
+        self.profit = 0
 
         self.data_train = df.drop(['CLOSE_AFTER'], axis=1)
         self.close_train = close
@@ -58,6 +59,8 @@ class ENV(gym.Env):
         self.inventory = 0
         self.initial_money = 1000000
         self.total_money = 1000000
+        self.profit = 0
+
         self.trade_date = np.random.randint(0, len(self.close1) - self.seq_time)
         Portfolio_unit = 1
         Rest_unit = 1
@@ -116,6 +119,7 @@ class ENV(gym.Env):
         total_profit = (self.total_money + self.close1[
             self.trade_date + self.t - 1] * 100 * self.inventory) - self.initial_money
         reward = self.get_reward(total_profit / self.initial_money)                 # 传入get_reward的就是收益率
+        self.profit = total_profit / self.initial_money # get profit
 
         self.t += 1
 
@@ -125,7 +129,7 @@ class ENV(gym.Env):
         add_state = np.array([self.Portfolio_unit, Rest_unit]).flatten()
         state = np.hstack([state, add_state])
 
-        return state, reward, done, total_profit    # return total_profit for additional info for testing
+        return state, reward, done, {}
 
 
 class SaveOnBestTrainingRewardCallback(BaseCallback):
@@ -216,9 +220,9 @@ def test_dqn():
     while True:
         i+=1
         action = model.predict(state)
-        next_state, reward, done, profit_info = env.step(action[0])
-        profit += profit_info
-        print("trying:",i,"action:", action,"try profit:",profit_info,"total profit:",profit)
+        next_state, reward, done, info = env.step(action[0])
+        profit += env.profit
+        print("trying:",i,"action:", action,"try profit:",env.profit,"total profit:",profit)
         if done:
             print('finish! total profit=',profit)
             break
