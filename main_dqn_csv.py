@@ -45,7 +45,7 @@ class ENV(gym.Env):
             high=np.array([5] * 31)
         )
 
-        self.seq_time = 180
+        self.seq_time = 480
 
         self.data_train = df.drop(['CLOSE_AFTER'], axis=1)
         self.close_train = close
@@ -62,7 +62,7 @@ class ENV(gym.Env):
         Portfolio_unit = 1
         Rest_unit = 1
         self.t = 0
-        state = self.dt[self.trade_date + self.t]  # 原始state就是数据的其他特征
+        state = self.dt[self.trade_date + self.t]
         add_state = np.array([Portfolio_unit, Rest_unit]).flatten()
         state = np.hstack([state, add_state])
         print(len(state))
@@ -92,26 +92,30 @@ class ENV(gym.Env):
         }
         action = action_dict.get(str(action))
 
-        if action > 0 and self.total_money * action < self.close1[self.trade_date + self.t] * 100:
-            action = self.close1[self.trade_date + self.t] * 100 / self.total_money
+        if action > 0 and self.total_money * action < self.close1[self.trade_date + self.t] * 100:  # can not afford
+            action = self.close1[self.trade_date + self.t] * 100 / self.total_money                 # use all the money to buy as many as possible (larger action value)
 
         if action > 0:  # buy
             L = self.total_money * action // (self.close1[self.trade_date + self.t] * 100)
 
         else:  # sell
-            L = self.inventory * action
+            L = int(self.inventory * action)
+
+        # L是进仓多少（buy为正，sell为负）
 
         self.inventory += L
-        self.total_money -= self.close1[self.trade_date + self.t] * 100 * L
+        self.total_money -= self.close1[self.trade_date + self.t] * 100 * L         # +-交易所用金额
+
         self.Portfolio_unit = (self.total_money + self.close1[
-            self.trade_date + self.t] * 100 * self.inventory) / self.initial_money
-        Rest_unit = self.total_money / self.initial_money
+            self.trade_date + self.t] * 100 * self.inventory) / self.initial_money  # 资产与初始资金比例
+        Rest_unit = self.total_money / self.initial_money                           # 剩余金额占比
 
-        add_state = np.array([self.Portfolio_unit, Rest_unit])
+        # add_state = np.array([self.Portfolio_unit, Rest_unit])
 
+        # 现金+持有与初始资金的差额
         total_profit = (self.total_money + self.close1[
             self.trade_date + self.t - 1] * 100 * self.inventory) - self.initial_money
-        reward = self.get_reward(total_profit / self.initial_money)
+        reward = self.get_reward(total_profit / self.initial_money)                 # 传入get_reward的就是收益率
 
         self.t += 1
 
@@ -121,7 +125,7 @@ class ENV(gym.Env):
         add_state = np.array([self.Portfolio_unit, Rest_unit]).flatten()
         state = np.hstack([state, add_state])
 
-        return state, reward, done, {}
+        return state, reward, done, total_profit    # return total_profit for additional info for testing
 
 
 class SaveOnBestTrainingRewardCallback(BaseCallback):
@@ -177,7 +181,8 @@ def plot_results(log_folder):
     # _window_size = len(R) // _w if (len(R) // _w) % 2 != 0 else len(R) // _w + 1
     # filtered = savgol_filter(R, _window_size, 1)
 
-    plt.title('smoothed returns')
+    #plt.title('smoothed returns')
+    plt.title('returns')
     plt.ylabel('Returns')
     plt.xlabel('time step')
     plt.plot(T, R)
@@ -195,7 +200,7 @@ def train_dqn():
     #                clip_obs=10.)
     model = DQN('MlpPolicy', env, verbose=1)
     callback = SaveOnBestTrainingRewardCallback(check_freq=100, log_dir=log_dir)
-    model.learn(total_timesteps=int(1e5), callback = callback, log_interval = 100)
+    model.learn(total_timesteps=int(100000), callback = callback, log_interval = 100)
     model.save('model_save/dqn')
 
 def test_dqn():
@@ -206,14 +211,16 @@ def test_dqn():
     model = DQN.load(log_dir)
     plot_results(f"model_save/")
     state = env.reset()
-    r = 0
-    for t in range(300):
+    profit = 0
+    i = 0
+    while True:
+        i+=1
         action = model.predict(state)
-        next_state, reward, done, info = env.step(action[0])
-        r += reward
-        print(r)
+        next_state, reward, done, profit_info = env.step(action[0])
+        profit += profit_info
+        print("trying:",i,"action:", action,"try profit:",profit_info,"total profit:",profit)
         if done:
-            print('finish')
+            print('finish! total profit=',profit)
             break
 
 if __name__ == '__main__':
@@ -221,8 +228,3 @@ if __name__ == '__main__':
     # os.makedirs(log_dir, exist_ok=True)
     train_dqn()
     test_dqn()
-
-
-'''
-训练输出：best mean reward, last mean reward per episode, num timesteps
-'''
