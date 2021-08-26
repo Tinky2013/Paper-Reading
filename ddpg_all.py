@@ -62,6 +62,7 @@ class ENV(gym.Env):
 
         self.seq_time = 480
         self.profit = 0
+        self.buy_hold = 0
 
         self.data_train = df.drop(['CLOSE_AFTER'], axis=1)
         self.close_train = df['CLOSE_AFTER']
@@ -83,6 +84,7 @@ class ENV(gym.Env):
         self.initial_money = 1000000
         self.total_money = 1000000
         self.profit = 0
+        self.buy_hold = 0
 
         self.trade_date = np.random.randint(0, len(self.close1) - self.seq_time)
         Portfolio_unit = 1
@@ -143,6 +145,8 @@ class ENV(gym.Env):
         self.t += 1
 
         done = self.seq_time < (self.t + 1)
+        self.buy_hold = (self.close1[self.trade_date + self.t] - self.close1[self.trade_date]) / self.close1[
+            self.trade_date]
 
         state = self.dt[self.trade_date + self.t]
         add_state = np.array([self.Portfolio_unit, Rest_unit]).flatten()
@@ -221,9 +225,9 @@ def train_ddpg():
     env = DummyVecEnv([lambda: env])
     # env = VecNormalize(env, norm_obs=True, norm_reward=True,
     #                clip_obs=10.)
-    model = DDPG('MlpPolicy', env, verbose=1, seed=1)
+    model = DDPG('MlpPolicy', env, verbose=1, batch_size=512, seed=1)
     callback = SaveOnBestTrainingRewardCallback(check_freq=100, log_dir=log_dir)
-    model.learn(total_timesteps=int(100000), callback = callback, log_interval = 100)
+    model.learn(total_timesteps=int(500000), callback = callback, log_interval = 100)
     model.save('model_save/ddpg')
 
 def test_ddpg():
@@ -240,7 +244,7 @@ def test_ddpg():
             next_state, reward, done, info = env.step(action[0])
             # print("trying:",i,"action:", action,"now profit:",env.profit)
             if done:
-                print('stock',i,' total profit=',env.profit)
+                print('stock',i,' total profit=',env.profit,' buy hold=',env.buy_hold)
                 break
 
 if __name__ == '__main__':
