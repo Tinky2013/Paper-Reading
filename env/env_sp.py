@@ -151,7 +151,9 @@ class ENV(gym.Env):
 
         # print("trade_date:",self.trade_date+self.t,"action:",action,"money:", self.total_money, "inventory:", self.inventory, "profit:",self.profit)
         if done:
-            reward = np.mean(self.profit_list)/np.std(self.profit_list)
+            sp = np.mean(self.profit_list)/np.std(self.profit_list)
+            reward = self.get_reward(sp)
+            print("sp:",sp,"reward:",reward)
             return state, reward, done, {}
         return state, 0, done, {}
 
