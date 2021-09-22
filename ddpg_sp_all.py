@@ -96,9 +96,9 @@ def train_ddpg():
     env = DummyVecEnv([lambda: env])
     # env = VecNormalize(env, norm_obs=True, norm_reward=True,
     #                clip_obs=10.)
-    model = DDPG('MlpPolicy', env, verbose=1, batch_size=2048, seed=1, learning_starts=10000)
+    model = DDPG('MlpPolicy', env, verbose=1, batch_size=2048, seed=1, learning_starts=4800)
     callback = SaveOnBestTrainingRewardCallback(check_freq=480, log_dir=log_dir)
-    model.learn(total_timesteps=int(20000), callback = callback, log_interval = 480)
+    model.learn(total_timesteps=int(9600), callback = callback, log_interval = 480)
     model.save('model_save/ddpg_sp')
 
 def test_ddpg():

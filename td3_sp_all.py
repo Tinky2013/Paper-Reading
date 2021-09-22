@@ -101,9 +101,9 @@ def train_td3():
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
     # model = TD3("MlpPolicy", env, action_noise=action_noise, verbose=1, batch_size=2048, seed=1)
 
-    model = TD3('MlpPolicy', env, verbose=1, batch_size=2048, seed=1, learning_starts=2400)
+    model = TD3('MlpPolicy', env, verbose=1, batch_size=2048, seed=1, learning_starts=4800)
     callback = SaveOnBestTrainingRewardCallback(check_freq=480, log_dir=log_dir)
-    model.learn(total_timesteps=int(4800), callback = callback, log_interval = 100)
+    model.learn(total_timesteps=int(9600), callback = callback, log_interval = 100)
     model.save('model_save/td3_sp')
 
 def test_td3():
