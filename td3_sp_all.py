@@ -101,9 +101,9 @@ def train_td3():
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
     # model = TD3("MlpPolicy", env, action_noise=action_noise, verbose=1, batch_size=2048, seed=1)
 
-    model = TD3('MlpPolicy', env, verbose=1, batch_size=2048, seed=1, learning_starts=4800)
+    model = TD3('MlpPolicy', env, verbose=1, batch_size=2048, seed=1, learning_starts=32000)
     callback = SaveOnBestTrainingRewardCallback(check_freq=480, log_dir=log_dir)
-    model.learn(total_timesteps=int(9600), callback = callback, log_interval = 100)
+    model.learn(total_timesteps=int(64000), callback = callback, log_interval = 100)
     model.save('model_save/td3_sp')
 
 def test_td3():
@@ -123,11 +123,12 @@ def test_td3():
             # print("trying:",day,"reward:", reward,"now profit:",env.profit)
             day+=1
             if done:
-                print('stock',i,' total profit=',env.profit,' buy hold=',env.buy_hold)
+                print('stock: {}, total profit: {:.2f}%, buy hold: {:.2f}%, sp: {:.4f}, mdd: {:.2f}%, romad: {:.4f}'
+                      .format(i, env.profit*100, env.buy_hold*100, env.sp, env.mdd*100, env.romad))
                 break
 
 if __name__ == '__main__':
     # log_dir = "tmp/"
     # os.makedirs(log_dir, exist_ok=True)
-    train_td3()
+    # train_td3()
     test_td3()

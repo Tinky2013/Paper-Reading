@@ -118,11 +118,12 @@ def test_ddpg():
             # print("trying:",day,"reward:", reward,"now profit:",env.profit)
             day+=1
             if done:
-                print('stock',i,' total profit=',env.profit,' buy hold=',env.buy_hold)
+                print('stock: {}, total profit: {:.2f}%, buy hold: {:.2f}%, sp: {:.4f}, mdd: {:.2f}%, romad: {:.4f}'
+                      .format(i, env.profit*100, env.buy_hold*100, env.sp, env.mdd*100, env.romad))
                 break
 
 if __name__ == '__main__':
     # log_dir = "tmp/"
     # os.makedirs(log_dir, exist_ok=True)
-    train_ddpg()
+    # train_ddpg()
     test_ddpg()
