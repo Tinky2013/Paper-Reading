@@ -53,7 +53,11 @@ class ENV(gym.Env):
 
         self.seq_time = 480
         self.profit = 0
-        self.buy_hold = 0
+
+        # self.buy_hold = 0
+        # self.sp = 0
+        # self.total_profit = 0
+        # self.maxdrawdown = 0
 
         self.data_train = df.drop(['CLOSE_AFTER'], axis=1)
         self.close_train = df['CLOSE_AFTER']
@@ -65,22 +69,27 @@ class ENV(gym.Env):
             self.dt = np.array(self.dt.iloc[:, 2:])
             self.close1 = self.close_train[self.stock_list == thscode]
             self.test_count+=1
+            self.trade_date = 0
         else:
             thscode = random.choice(self.stock_train)
             self.dt = self.data_train[self.stock_list == thscode]
             self.dt = np.array(self.dt.iloc[:, 2:])
             self.close1 = self.close_train[self.stock_list == thscode]
+            self.trade_date = np.random.randint(0, len(self.close1) - self.seq_time)
 
         self.inventory = 0
         self.initial_money = 1000000
         self.total_money = 1000000
         self.profit = 0
-        self.profit_list = []
-
+        self.profit_list = []       # 每个时间点的profit
+        self.portfolio_list = []    # 每个step的资产
 
         self.buy_hold = 0
+        self.sp = 0
+        self.maxdrawdown = 0
+        self.romad = 0
 
-        self.trade_date = np.random.randint(0, len(self.close1) - self.seq_time)
+
         Portfolio_unit = 1
         Rest_unit = 1
         self.t = 0
@@ -138,10 +147,15 @@ class ENV(gym.Env):
         # reward = self.get_reward(total_profit / self.initial_money)                 # 传入get_reward的就是收益率
         self.profit = total_profit / self.initial_money # get profit
         self.profit_list.append(self.profit)
+        self.portfolio_list.append(self.Portfolio_unit)
 
         self.t += 1
 
-        done = self.seq_time < (self.t + 1)
+        if self.istest:
+            done = len(self.close1)-1 < (self.t + 1)
+        else:
+            done = self.seq_time < (self.t + 1)
+
         self.buy_hold = (self.close1[self.trade_date + self.t] - self.close1[self.trade_date]) / self.close1[
             self.trade_date]
 
@@ -150,10 +164,19 @@ class ENV(gym.Env):
         state = np.hstack([state, add_state])
 
         # print("trade_date:",self.trade_date+self.t,"action:",action,"money:", self.total_money, "inventory:", self.inventory, "profit:",self.profit)
-        if done:
-            sp = np.mean(self.profit_list)/np.std(self.profit_list)
-            reward = self.get_reward(sp)
-            print("sp:",sp,"reward:",reward)
-            return state, reward, done, {}
-        return state, 0, done, {}
+
+        # 计算夏普率
+        sp_std = np.std(self.profit_list)
+        if sp_std<10e-4:
+            sp_std=10e-4
+        self.sp = np.mean(self.profit_list)/sp_std          # 最后输出全时间段的夏普率
+
+        # 计算最大回撤
+        if done and self.istest:
+            self.mdd = np.max([(self.portfolio_list[0]-self.portfolio_list[i])/self.portfolio_list[0] for i in range(len(self.close1)-1)])
+            self.romad = self.portfolio_list[-1]/self.mdd
+
+        reward = self.get_reward(self.sp)
+        # print("sp:",sp,"reward:",reward)
+        return state, reward, done, {}
 
