@@ -96,8 +96,8 @@ class ENV(gym.Env):
         state = self.dt[self.trade_date + self.t]
         add_state = np.array([Portfolio_unit, Rest_unit]).flatten()
         state = np.hstack([state, add_state])
-        # print("############### reset env ###############")
-        # print("Stock:", thscode)
+        #print("############### reset env ###############")
+        #print("Stock:", thscode)
 
         return state
 
@@ -145,7 +145,7 @@ class ENV(gym.Env):
         total_profit = (self.total_money + self.close1[
             self.trade_date + self.t - 1] * 100 * self.inventory) - self.initial_money
         # reward = self.get_reward(total_profit / self.initial_money)                 # 传入get_reward的就是收益率
-        self.profit = total_profit / self.initial_money # get profit
+        self.profit = total_profit / self.initial_money # get profit（收益率）
         self.profit_list.append(self.profit)
         self.portfolio_list.append(self.Portfolio_unit)
 
@@ -163,8 +163,6 @@ class ENV(gym.Env):
         add_state = np.array([self.Portfolio_unit, Rest_unit]).flatten()
         state = np.hstack([state, add_state])
 
-        # print("trade_date:",self.trade_date+self.t,"action:",action,"money:", self.total_money, "inventory:", self.inventory, "profit:",self.profit)
-
         # 计算夏普率
         sp_std = np.std(self.profit_list)
         if sp_std<10e-4:
@@ -173,10 +171,16 @@ class ENV(gym.Env):
 
         # 计算最大回撤
         if done and self.istest:
-            self.mdd = np.max([(self.portfolio_list[0]-self.portfolio_list[i])/self.portfolio_list[0] for i in range(len(self.close1)-1)])
-            self.romad = self.portfolio_list[-1]/self.mdd
+            self.mdd = -np.min([
+                np.min([self.portfolio_list[j]-self.portfolio_list[i] for j in range(i,self.t)]) for i in range(self.t)
+            ])  # 计算最大回撤
+            self.romad = self.profit/self.mdd
 
         reward = self.get_reward(self.sp)
-        # print("sp:",sp,"reward:",reward)
+
+        # 检查测试中采用的策略
+        # print('trade_date: {}, action: {:.3f}, inventory: {:.3f}, money left: {:.3f}, profit: {:.3f}. portfolio unit: {:.3f}'
+        #              .format(self.trade_date+self.t, action, self.inventory, self.total_money, self.profit, self.Portfolio_unit))
+
         return state, reward, done, {}
 
