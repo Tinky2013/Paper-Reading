@@ -87,6 +87,7 @@ class ENV(gym.Env):
         self.buy_hold = 0
         self.sp = 0
         self.maxdrawdown = 0
+        self.mdd = 0
         self.romad = 0
 
 
@@ -171,9 +172,12 @@ class ENV(gym.Env):
 
         # 计算最大回撤
         if done and self.istest:
-            self.mdd = -np.min([
-                np.min([self.portfolio_list[j]-self.portfolio_list[i] for j in range(i,self.t)]) for i in range(self.t)
-            ])  # 计算最大回撤
+            # 列表储存从i-th step开始的最大回撤率
+            step_mdd_list = [
+                (self.portfolio_list[i] - np.min(self.portfolio_list[i:]))/self.portfolio_list[i]  # i-step开始的最大回撤率
+                             for i in range(self.t)
+            ]
+            self.mdd = np.max(step_mdd_list)  # 计算最大回撤
             self.romad = self.profit/self.mdd
 
         reward = self.get_reward(self.sp)
