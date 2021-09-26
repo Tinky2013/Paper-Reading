@@ -23,7 +23,7 @@ import gym
 import os
 import h5py
 
-from env.env_sp import ENV
+from env.env_sp1 import ENV
 
 class SaveOnBestTrainingRewardCallback(BaseCallback):
     """
@@ -39,7 +39,7 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
         super(SaveOnBestTrainingRewardCallback, self).__init__(verbose)
         self.check_freq = check_freq
         self.log_dir = log_dir
-        self.save_path = os.path.join(log_dir, 'best_model_ppo_sp')
+        self.save_path = os.path.join(log_dir, 'best_model_ppo_sp1')
         self.best_mean_reward = -np.inf
 
     def _init_callback(self) -> None:
@@ -99,11 +99,11 @@ def train_ppo():
 
     model = PPO('MlpPolicy', env, verbose=1, batch_size=2048, seed=1)
     callback = SaveOnBestTrainingRewardCallback(check_freq=480, log_dir=log_dir)
-    model.learn(total_timesteps=int(4800), callback = callback, log_interval = 480)
-    model.save('model_save/ppo_sp')
+    model.learn(total_timesteps=int(14400), callback = callback, log_interval = 480)
+    model.save('model_save/ppo_sp1')
 
 def test_ppo():
-    log_dir = f"model_save/best_model_ppo_sp"
+    log_dir = f"model_save/best_model_ppo_sp1"
     env = ENV(istest=True)
     env.render = True
     env = Monitor(env, log_dir)
@@ -126,5 +126,5 @@ def test_ppo():
 if __name__ == '__main__':
     # log_dir = "tmp/"
     # os.makedirs(log_dir, exist_ok=True)
-    # train_ppo()
+    train_ppo()
     test_ppo()
