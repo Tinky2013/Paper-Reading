@@ -23,7 +23,7 @@ import gym
 import os
 import h5py
 
-from env.env_sp1 import ENV
+from env.env_sp2 import ENV
 
 class SaveOnBestTrainingRewardCallback(BaseCallback):
     """
@@ -39,7 +39,7 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
         super(SaveOnBestTrainingRewardCallback, self).__init__(verbose)
         self.check_freq = check_freq
         self.log_dir = log_dir
-        self.save_path = os.path.join(log_dir, 'best_model_td3_sp1')
+        self.save_path = os.path.join(log_dir, 'best_model_td3_sp2')
         self.best_mean_reward = -np.inf
 
     def _init_callback(self) -> None:
@@ -101,13 +101,13 @@ def train_td3():
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
     # model = TD3("MlpPolicy", env, action_noise=action_noise, verbose=1, batch_size=2048, seed=1)
 
-    model = TD3('MlpPolicy', env, verbose=1, batch_size=2048, seed=1, learning_starts=32000)
+    model = TD3('MlpPolicy', env, verbose=1, batch_size=2048, seed=1, learning_starts=1440)
     callback = SaveOnBestTrainingRewardCallback(check_freq=480, log_dir=log_dir)
-    model.learn(total_timesteps=int(64000), callback = callback, log_interval = 100)
-    model.save('model_save/td3_sp1')
+    model.learn(total_timesteps=int(2880), callback = callback, log_interval = 100)
+    model.save('model_save/td3_sp2')
 
 def test_td3():
-    log_dir = f"model_save/best_model_td3_sp1"
+    log_dir = f"model_save/best_model_td3_sp2"
     env = ENV(istest=True)
     env.render = True
     env = Monitor(env, log_dir)
@@ -130,5 +130,5 @@ def test_td3():
 if __name__ == '__main__':
     # log_dir = "tmp/"
     # os.makedirs(log_dir, exist_ok=True)
-    train_td3()
+    # train_td3()
     test_td3()

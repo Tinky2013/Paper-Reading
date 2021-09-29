@@ -23,7 +23,7 @@ import gym
 import os
 import h5py
 
-from env.env_sp1 import ENV
+from env.env_sp2 import ENV
 
 class SaveOnBestTrainingRewardCallback(BaseCallback):
     """
@@ -39,7 +39,7 @@ class SaveOnBestTrainingRewardCallback(BaseCallback):
         super(SaveOnBestTrainingRewardCallback, self).__init__(verbose)
         self.check_freq = check_freq
         self.log_dir = log_dir
-        self.save_path = os.path.join(log_dir, 'best_model_ddpg_sp1')
+        self.save_path = os.path.join(log_dir, 'best_model_ddpg_sp2')
         self.best_mean_reward = -np.inf
 
     def _init_callback(self) -> None:
@@ -99,10 +99,10 @@ def train_ddpg():
     model = DDPG('MlpPolicy', env, verbose=1, batch_size=2048, seed=1, learning_starts=4800)
     callback = SaveOnBestTrainingRewardCallback(check_freq=480, log_dir=log_dir)
     model.learn(total_timesteps=int(9600), callback = callback, log_interval = 480)
-    model.save('model_save/ddpg_sp1')
+    model.save('model_save/ddpg_sp2')
 
 def test_ddpg():
-    log_dir = f"model_save/best_model_ddpg_sp1"
+    log_dir = f"model_save/best_model_ddpg_sp2"
     env = ENV(istest=True)
     env.render = True
     env = Monitor(env, log_dir)
