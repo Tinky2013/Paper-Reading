@@ -23,14 +23,15 @@ class ENV(gym.Env):
 
         self.istest = istest
         # if self.istest:
-        #     df = pd.read_csv(r'combine/combo_2019.csv')
+        #     df = pd.read_csv(r'combine/2019_zz500.csv')   # 2019测试
         #     self.today = '2019/1/2'
+        #     df = pd.read_csv(r'combine/2020_zz500.csv')   # 2020测试
+        #     self.today = '2020/1/2'
         # else:
-        #     df = pd.read_csv(r'combine/2018_zz500.csv')
+        #     df = pd.read_csv(r'combine/2018_zz500.csv')   # 2018训练
         #     self.today = '2018/1/2'
-
-        # df = pd.read_csv(r'combine/2020_zz500.csv')
-        # self.today = '2020/1/2'
+        #     df = pd.read_csv(r'combine/2019_zz500.csv')   # 2019训练
+        #     self.today = '2019/1/2'
 
         self.stock_all = df['thscode'].unique() # len=454
         self.test_count = 0  # for testing

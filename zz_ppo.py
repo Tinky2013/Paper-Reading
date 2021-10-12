@@ -113,8 +113,8 @@ def test_ppo():
     result_dt = pd.DataFrame([])    # result_dt: 所有股票一年测试结果数据
     for i in range(15):
         state = env.reset()
-        stock_bh_id = 'stock_bh_'+str(i)
-        stock_port_id = 'stock_port_'+str(i)
+        stock_bh_id = 'stock_bh_'+str(i)        # 记录每个股票交易的buy_hold
+        stock_port_id = 'stock_port_'+str(i)    # 记录每个股票交易的portfolio
         stock_bh_dt = []
         stock_port_dt = []
 
@@ -123,24 +123,26 @@ def test_ppo():
             action = model.predict(state)
             next_state, reward, done, info = env.step(action[0])
             state = next_state
-            # print("trying:",day,"reward:", reward,"now profit:",env.profit)
+            # print("trying:",day,"reward:", reward,"now profit:",env.profit)   # 测试每一步的交易policy
             stock_bh_dt.append(env.buy_hold)
             stock_port_dt.append(env.Portfolio_unit)
             day+=1
             if done:
                 print('stock: {}, total profit: {:.2f}%, buy hold: {:.2f}%, sp: {:.4f}, mdd: {:.2f}%, romad: {:.4f}'
                       .format(i, env.profit*100, env.buy_hold*100, env.sp, env.mdd*100, env.romad))
+                # 交易完后记录：股票ID，利润（单位100%），buy_hold（单位100%），夏普率，最大回撤率（单位100%），romad
                 result=pd.DataFrame([[i,env.profit*100,env.buy_hold*100,env.sp,env.mdd*100,env.romad]])
                 break
 
-        trade_dt_stock = pd.DataFrame({stock_bh_id: stock_bh_dt, stock_port_id: stock_port_dt}) # trade_dt_stock: 单支股票的交易数据
-        trade_dt = pd.concat([trade_dt, trade_dt_stock], axis=1)
-        result_dt = pd.concat([result_dt,result],axis=0)
+        trade_dt_stock = pd.DataFrame({stock_bh_id: stock_bh_dt, stock_port_id: stock_port_dt}) # 支股票的交易数据
+        trade_dt = pd.concat([trade_dt, trade_dt_stock], axis=1)    # 所有股票交易数据合并（加行）
+        result_dt = pd.concat([result_dt,result],axis=0)            # 所有股票结果数据合并（加列）
 
     result_dt.columns = ['stock_id','prfit(100%)','buy_hold(100%)','sp','mdd(100%)','romad']
     trade_dt.to_csv('out_dt/trade_'+MODEL_PATH+'.csv',index=False)
     result_dt.to_csv('out_dt/result_'+MODEL_PATH+'.csv',index=False)
 
+# 最新命名方式：算法+参数（迭代次数）+用哪年训练的
 MODEL_PATH = 'ppo_400w_2018tr'
 
 if __name__ == '__main__':
