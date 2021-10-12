@@ -1,5 +1,5 @@
 
-from stable_baselines3 import PPO
+from stable_baselines3 import DDPG
 
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.sac.policies import MlpPolicy
@@ -97,7 +97,7 @@ def train():
     # env = VecNormalize(env, norm_obs=True, norm_reward=True,
     #                clip_obs=10.)
 
-    model = PPO('MlpPolicy', env, verbose=1, batch_size=PARAM['batch_size'], seed=PARAM['seed'])
+    model = DDPG('MlpPolicy', env, verbose=1, batch_size=PARAM['batch_size'], seed=PARAM['seed'], learning_starts=PARAM['learning_starts'])
     callback = SaveOnBestTrainingRewardCallback(check_freq=480, log_dir=log_dir)
     model.learn(total_timesteps=int(PARAM['total_time_step']), callback = callback, log_interval = 480)
     model.save('model_save/'+MODEL_PATH)
@@ -107,7 +107,7 @@ def test():
     env = ENV(istest=True)
     env.render = True
     env = Monitor(env, log_dir)
-    model = PPO.load(log_dir)
+    model = DDPG.load(log_dir)
     # plot_results(f"model_save/")
     trade_dt = pd.DataFrame([])     # trade_dt: 所有股票的交易数据
     result_dt = pd.DataFrame([])    # result_dt: 所有股票一年测试结果数据
@@ -144,11 +144,11 @@ def test():
 
 # 全局参数：根据不同的测试任务进行修改
 TEST_STOCK_NUM = 15             # 测试多少股票（zz500共有453支）
-MODEL_PATH = 'ppo_400w_2018tr'  # 保存模型名称，最新命名方式：算法+参数（迭代次数）+用哪年训练的
+MODEL_PATH = 'ddpg_200w_2018tr' # 保存模型名称，最新命名方式：算法+参数（迭代次数）+用哪年训练的
 TRAIN_OR_NOT = False            # False代表只测试现有模型，True要训练并测试新的模型
 PARAM = {
     'total_time_step': 4000000,
-    'learning_starts': None,
+    'learning_starts': 2000000,
     'batch_size': 2048,
     'seed': 1,
 }
