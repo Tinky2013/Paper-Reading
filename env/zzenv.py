@@ -60,6 +60,7 @@ class ENV(gym.Env):
 
         self.seq_time = 48
         self.profit = 0
+        self.flow = 0
 
         self.data_train = df.drop(['CLOSE_AFTER'], axis=1)
         self.close_train = df['CLOSE_AFTER']
@@ -162,6 +163,7 @@ class ENV(gym.Env):
             costing = costing * (1. + 0.001 + 0.0003) + ((-L) // 10 + 1) / 10
 
         # L是进仓多少（buy为正，sell为负，以100为单位1）
+        self.flow = L
         self.inventory += L
 
         self.total_money -= costing * L
