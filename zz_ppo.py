@@ -115,8 +115,13 @@ def test():
         state = env.reset()
         stock_bh_id = 'stock_bh_'+str(i)        # 记录每个股票交易的buy_hold
         stock_port_id = 'stock_port_'+str(i)    # 记录每个股票交易的portfolio
+        stock_action_id = 'stock_action_' + str(i)  # 记录每个股票交易的action
+        flow_L_id = 'stock_flow_' + str(i)      # 记录每个股票的流水
+
         stock_bh_dt = []
         stock_port_dt = []
+        action_policy_dt = []
+        flow_L_dt = []
 
         day = 0
         while True:
@@ -126,6 +131,8 @@ def test():
             # print("trying:",day,"reward:", reward,"now profit:",env.profit)   # 测试每一步的交易policy
             stock_bh_dt.append(env.buy_hold)
             stock_port_dt.append(env.Portfolio_unit)
+            action_policy_dt.append(action[0][0])  # 用于记录policy
+            flow_L_dt.append(env.flow)
             day+=1
             if done:
                 print('stock: {}, total profit: {:.2f}%, buy hold: {:.2f}%, sp: {:.4f}, mdd: {:.2f}%, romad: {:.4f}'
@@ -134,7 +141,12 @@ def test():
                 result=pd.DataFrame([[i,env.profit*100,env.buy_hold*100,env.sp,env.mdd*100,env.romad]])
                 break
 
-        trade_dt_stock = pd.DataFrame({stock_bh_id: stock_bh_dt, stock_port_id: stock_port_dt}) # 支股票的交易数据
+        # trade_dt_stock = pd.DataFrame({stock_bh_id: stock_bh_dt, stock_port_id: stock_port_dt}) # 支股票的交易数据
+        trade_dt_stock = pd.DataFrame({stock_port_id: stock_port_dt,
+                                       stock_bh_id: stock_bh_dt,
+                                       stock_action_id: action_policy_dt,
+                                       flow_L_id: flow_L_dt})  # 支股票的交易数据
+
         trade_dt = pd.concat([trade_dt, trade_dt_stock], axis=1)    # 所有股票交易数据合并（加行）
         result_dt = pd.concat([result_dt,result],axis=0)            # 所有股票结果数据合并（加列）
 
@@ -143,9 +155,9 @@ def test():
     result_dt.to_csv('out_dt/result_'+MODEL_PATH+'.csv',index=False)
 
 # 全局参数：根据不同的测试任务进行修改
-TEST_STOCK_NUM = 15             # 测试多少股票（zz500共有453支）
-MODEL_PATH = 'ppo_400w_2018tr'  # 保存模型名称，最新命名方式：算法+参数（迭代次数）+用哪年训练的
-TRAIN_OR_NOT = False            # False代表只测试现有模型，True要训练并测试新的模型
+TEST_STOCK_NUM = 453             # 测试多少股票（zz500共有453支）
+MODEL_PATH = 'ppo_400w_2019tr'  # 保存模型名称，最新命名方式：算法+参数（迭代次数）+用哪年训练的
+TRAIN_OR_NOT = True            # False代表只测试现有模型，True要训练并测试新的模型
 PARAM = {
     'total_time_step': 4000000,
     'learning_starts': None,

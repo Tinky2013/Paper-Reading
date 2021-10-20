@@ -143,6 +143,7 @@ def test():
 
         # trade_dt_stock = pd.DataFrame({stock_bh_id: stock_bh_dt, stock_port_id: stock_port_dt}) # 支股票的交易数据
         trade_dt_stock = pd.DataFrame({stock_port_id: stock_port_dt,
+                                       stock_bh_id: stock_bh_dt,
                                        stock_action_id: action_policy_dt,
                                        flow_L_id: flow_L_dt})  # 支股票的交易数据
 
@@ -155,10 +156,10 @@ def test():
 
 # 全局参数：根据不同的测试任务进行修改
 TEST_STOCK_NUM = 15             # 测试多少股票（zz500共有453支）
-MODEL_PATH = 'ppo_400w_2018tr'  # 保存模型名称，最新命名方式：算法+参数（迭代次数）+用哪年训练的
-TRAIN_OR_NOT = False           # False代表只测试现有模型，True要训练并测试新的模型
+MODEL_PATH = 'ppo_test'  # 保存模型名称，最新命名方式：算法+参数（迭代次数）+用哪年训练的
+TRAIN_OR_NOT = True           # False代表只测试现有模型，True要训练并测试新的模型
 PARAM = {
-    'total_time_step': 4000000,
+    'total_time_step': 2000,
     'learning_starts': None,
     'batch_size': 2048,
     'seed': 1,
