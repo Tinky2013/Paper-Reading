@@ -134,7 +134,7 @@ class ENV(gym.Env):
 
         else:  # 卖出
             L = int(self.inventory * action)
-            costing = costing * (1. + 0.001 + 0.0001)+ ((-L)//10 + 1) / 10
+            costing = costing * (1. - 0.001 - 0.0001) - ((-L)//10 + 1) / 10
 
         # L是进仓多少（buy为正，sell为负，以100为单位1）
         self.inventory += L
@@ -170,10 +170,12 @@ class ENV(gym.Env):
         state = np.hstack([state, add_state])
 
         # 计算夏普率
-        sp_std = np.std(self.profit_list)
-        if sp_std<10e-4:
-            sp_std=10e-4
-        self.sp = np.mean(self.profit_list)/sp_std          # 最后输出全时间段的夏普率
+        # sp_std = np.std(self.profit_list)
+        # if sp_std<10e-4:
+        #     sp_std=10e-4
+        # self.sp = (np.mean(self.profit_list)-0.03)/sp_std          # 最后输出全时间段的夏普率（无风险利率3%）
+        _r = np.diff(np.log(self.profit_list))
+        self.sp = _r.mean()/(_r.std() + 1e-10)
 
         # 计算最大回撤
         if done and self.istest:
