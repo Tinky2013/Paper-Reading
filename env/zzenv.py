@@ -27,11 +27,15 @@ class ENV(gym.Env):
         #     self.today = '2019/1/2'
         #     df = pd.read_csv(r'combine/2020_zz500.csv')   # 2020测试
         #     self.today = '2020/1/2'
+        #     df = pd.read_csv(r'combine/2021_zz500.csv')   # 2021测试
+        #     self.today = '2021/1/4'
         # else:
         #     df = pd.read_csv(r'combine/2018_zz500.csv')   # 2018训练
         #     self.today = '2018/1/2'
         #     df = pd.read_csv(r'combine/2019_zz500.csv')   # 2019训练
         #     self.today = '2019/1/2'
+        #     df = pd.read_csv(r'combine/2020_zz500.csv')   # 2020训练
+        #     self.today = '2020/1/2'
 
         self.stock_all = df['thscode'].unique() # len=454
         self.test_count = 0  # for testing
@@ -58,7 +62,7 @@ class ENV(gym.Env):
             high=np.array([5] * 31)
         )
 
-        self.seq_time = 48
+        self.seq_time = 480
         self.profit = 0
         self.flow = 0
 
