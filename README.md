@@ -12,5 +12,7 @@
 
 当前版本：zz_rolling（正在开发valid的方式）
 
-* visualize：可视化执行文件
-* normalize：数据标准化
+* visualize.py：可视化执行文件
+* normalize.py：数据标准化
+* out_dt：存储测试数据，用作可视化
+* model_save：存储模型
