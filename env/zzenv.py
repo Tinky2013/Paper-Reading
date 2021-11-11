@@ -17,25 +17,35 @@ import h5py
 class ENV(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self,istest):
-        df = pd.read_csv(r'zztest.csv')
-        self.today = '2018/1/2'
+    def __init__(self,istest, par):
 
         self.istest = istest
-        # if self.istest:
-        #     df = pd.read_csv(r'combine/2019_zz500.csv')   # 2019测试
-        #     self.today = '2019/1/2'
-        #     df = pd.read_csv(r'combine/2020_zz500.csv')   # 2020测试
-        #     self.today = '2020/1/2'
-        #     df = pd.read_csv(r'combine/2021_zz500.csv')   # 2021测试
-        #     self.today = '2021/1/4'
-        # else:
-        #     df = pd.read_csv(r'combine/2018_zz500.csv')   # 2018训练
-        #     self.today = '2018/1/2'
-        #     df = pd.read_csv(r'combine/2019_zz500.csv')   # 2019训练
-        #     self.today = '2019/1/2'
-        #     df = pd.read_csv(r'combine/2020_zz500.csv')   # 2020训练
-        #     self.today = '2020/1/2'
+        if self.istest:
+            if par['dt']['test']=='2019':
+                df = pd.read_csv(r'combine/2019_zz500.csv')
+                self.today = '2019/1/2'
+            if par['dt']['test'] == '2020':
+                df = pd.read_csv(r'combine/2020_zz500.csv')
+                self.today = '2020/1/2'
+            if par['dt']['test'] == '2021':
+                df = pd.read_csv(r'combine/2021_zz500.csv')
+                self.today = '2021/1/4'
+            if par['dt']['test'] == 'local':
+                df = pd.read_csv(r'zztest.csv')
+                self.today = '2018/1/2'
+        else:
+            if par['dt']['train']=='2018':
+                df = pd.read_csv(r'combine/2018_zz500.csv')
+                self.today = '2018/1/2'
+            if par['dt']['train']=='2019':
+                df = pd.read_csv(r'combine/2019_zz500.csv')
+                self.today = '2019/1/2'
+            if par['dt']['train']=='2020':
+                df = pd.read_csv(r'combine/2020_zz500.csv')
+                self.today = '2020/1/2'
+            if par['dt']['train'] == 'local':
+                df = pd.read_csv(r'zztest.csv')
+                self.today = '2018/1/2'
 
         self.stock_all = df['thscode'].unique() # len=454
         self.test_count = 0  # for testing
@@ -62,7 +72,7 @@ class ENV(gym.Env):
             high=np.array([5] * 31)
         )
 
-        self.seq_time = 480
+        self.seq_time = par['seq_time']
         self.profit = 0
         self.flow = 0
 
