@@ -17,10 +17,10 @@ import h5py
 class ENV(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self,istest, par):
+    def __init__(self, util, par):
 
-        self.istest = istest
-        if self.istest:
+        self.util = util
+        if self.util == 'test':
             if par['dt']['test']=='2019':
                 df = pd.read_csv(r'combine/2019_zz500.csv')
                 self.today = '2019/1/2'
@@ -31,9 +31,22 @@ class ENV(gym.Env):
                 df = pd.read_csv(r'combine/2021_zz500.csv')
                 self.today = '2021/1/4'
             if par['dt']['test'] == 'local':
-                df = pd.read_csv(r'zztest.csv')
+                df = pd.read_csv(r'combine/local_zz500.csv')
                 self.today = '2018/1/2'
-        else:
+        elif self.util == 'val':
+            if par['dt']['val']=='2019':
+                df = pd.read_csv(r'combine/2019_zz500.csv')
+                self.today = '2019/1/2'
+            if par['dt']['val'] == '2020':
+                df = pd.read_csv(r'combine/2020_zz500.csv')
+                self.today = '2020/1/2'
+            if par['dt']['val'] == '2021':
+                df = pd.read_csv(r'combine/2021_zz500.csv')
+                self.today = '2021/1/4'
+            if par['dt']['val'] == 'local':
+                df = pd.read_csv(r'combine/local_zz500.csv')
+                self.today = '2018/1/2'
+        elif self.util == 'train':
             if par['dt']['train']=='2018':
                 df = pd.read_csv(r'combine/2018_zz500.csv')
                 self.today = '2018/1/2'
@@ -44,7 +57,7 @@ class ENV(gym.Env):
                 df = pd.read_csv(r'combine/2020_zz500.csv')
                 self.today = '2020/1/2'
             if par['dt']['train'] == 'local':
-                df = pd.read_csv(r'zztest.csv')
+                df = pd.read_csv(r'combine/local_zz500.csv')
                 self.today = '2018/1/2'
 
         self.stock_all = df['thscode'].unique() # len=454
@@ -81,7 +94,7 @@ class ENV(gym.Env):
         self.time_stump = df['time']
 
     def reset(self):
-        if self.istest:
+        if self.util == 'test':
             thscode = self.stock_all[self.test_count]  # 测试时使用指定测试股票
             self.dt = self.data_train[self.stock_list == thscode]
             self.dt1 = np.array(self.dt.iloc[:, 3:])
@@ -196,7 +209,7 @@ class ENV(gym.Env):
 
         self.t += 1
 
-        if self.istest:
+        if self.util == 'test':
             done = len(self.close1)-1 < (self.t + 1)
         else:
             done = self.seq_time < (self.t + 1)
@@ -218,7 +231,7 @@ class ENV(gym.Env):
         # self.sp = _r.mean()/(_r.std() + 1e-10)
 
         # 计算最大回撤
-        if done and self.istest:
+        if done and self.util == 'test':
             # 列表储存从i-th step开始的最大回撤率
             step_mdd_list = [
                 (self.portfolio_list[i] - np.min(self.portfolio_list[i:]))/self.portfolio_list[i]  # i-step开始的最大回撤率

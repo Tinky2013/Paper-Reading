@@ -7,7 +7,7 @@ from stable_baselines3.common import results_plotter
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.results_plotter import load_results, ts2xy, plot_results
 from stable_baselines3.common.noise import NormalActionNoise
-from stable_baselines3.common.callbacks import BaseCallback
+from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
 import os
 import numpy as np
 from stable_baselines3.common.results_plotter import load_results, ts2xy
@@ -91,9 +91,9 @@ def plot_results(log_folder):
 def train():
 
     log_dir = f"model_save/"
-    env = ENV(istest=False, par=PARAM)
-    env = Monitor(env, log_dir)
-    env = DummyVecEnv([lambda: env])
+    env, env_eval = ENV(util='train', par=PARAM), ENV(util='val', par=PARAM)
+    env, env_eval = Monitor(env, log_dir), Monitor(env_eval, log_dir)
+    env, env_eval = DummyVecEnv([lambda: env]), DummyVecEnv([lambda: env_eval])
     # env = VecNormalize(env, norm_obs=True, norm_reward=True,
     #                clip_obs=10.)
 
@@ -106,13 +106,18 @@ def train():
     elif PARAM['algo']=='ppo':
         model = PPO('MlpPolicy', env, verbose=1, batch_size=PARAM['batch_size'], seed=PARAM['seed'])
 
-    callback = SaveOnBestTrainingRewardCallback(check_freq=PARAM['seq_time']*10, log_dir=log_dir)
-    model.learn(total_timesteps=int(PARAM['total_time_step']), callback = callback, log_interval = 480)
+    # callback = SaveOnBestTrainingRewardCallback(check_freq=PARAM['seq_time']*10, log_dir=log_dir)
+
+    eval_callback = EvalCallback(env_eval, best_model_save_path='model_save/best_model_'+MODEL_PATH,
+                                 log_path=log_dir, eval_freq=PARAM['seq_time']*10,
+                                 deterministic=True, render=False)
+
+    model.learn(total_timesteps=int(PARAM['total_time_step']), callback = eval_callback, log_interval = 1)
     model.save('model_save/'+MODEL_PATH)
 
 def test():
-    log_dir = f"model_save/best_model_"+MODEL_PATH
-    env = ENV(istest=True, par=PARAM)
+    log_dir = f"model_save/best_model_"+MODEL_PATH+'/best_model'
+    env = ENV(util='test', par=PARAM)
     env.render = True
     env = Monitor(env, log_dir)
 
@@ -182,6 +187,7 @@ PARAM = {
     'seq_time': 48,
     'dt': {             # which data for train and test
         'train': 'local',
+        'val': 'local',
         'test': 'local',
     },
 }

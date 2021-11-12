@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # 全局参数：根据不同的测试任务进行修改
-MODEL_PATH = 'td3_test'  # 要测试哪个模型
+MODEL_PATH = 'ppo_test'  # 要测试哪个模型
 TEST_STOCK_NUM = 15     # 要测试多少支股票
 ST = '2019' # 从哪年的第一个交易日开始测试
 ED = '2020' # 到哪年的第一个交易日结束测试
