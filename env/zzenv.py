@@ -17,46 +17,46 @@ import h5py
 class ENV(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, util, par):
+    def __init__(self, util, par, dt):
 
         self.util = util
         if self.util == 'test':
-            if par['dt']['test']=='2019':
+            if dt['test']=='2019':
                 df = pd.read_csv(r'combine/2019_zz500.csv')
                 self.today = '2019/1/2'
-            if par['dt']['test'] == '2020':
+            if dt['test'] == '2020':
                 df = pd.read_csv(r'combine/2020_zz500.csv')
                 self.today = '2020/1/2'
-            if par['dt']['test'] == '2021':
+            if dt['test'] == '2021':
                 df = pd.read_csv(r'combine/2021_zz500.csv')
                 self.today = '2021/1/4'
-            if par['dt']['test'] == 'local':
+            if dt['test'] == 'local':
                 df = pd.read_csv(r'combine/local_zz500.csv')
                 self.today = '2018/1/2'
         elif self.util == 'val':
-            if par['dt']['val']=='2019':
+            if dt['val']=='2019':
                 df = pd.read_csv(r'combine/2019_zz500.csv')
                 self.today = '2019/1/2'
-            if par['dt']['val'] == '2020':
+            if dt['val'] == '2020':
                 df = pd.read_csv(r'combine/2020_zz500.csv')
                 self.today = '2020/1/2'
-            if par['dt']['val'] == '2021':
+            if dt['val'] == '2021':
                 df = pd.read_csv(r'combine/2021_zz500.csv')
                 self.today = '2021/1/4'
-            if par['dt']['val'] == 'local':
+            if dt['val'] == 'local':
                 df = pd.read_csv(r'combine/local_zz500.csv')
                 self.today = '2018/1/2'
         elif self.util == 'train':
-            if par['dt']['train']=='2018':
+            if dt['train']=='2018':
                 df = pd.read_csv(r'combine/2018_zz500.csv')
                 self.today = '2018/1/2'
-            if par['dt']['train']=='2019':
+            if dt['train']=='2019':
                 df = pd.read_csv(r'combine/2019_zz500.csv')
                 self.today = '2019/1/2'
-            if par['dt']['train']=='2020':
+            if dt['train']=='2020':
                 df = pd.read_csv(r'combine/2020_zz500.csv')
                 self.today = '2020/1/2'
-            if par['dt']['train'] == 'local':
+            if dt['train'] == 'local':
                 df = pd.read_csv(r'combine/local_zz500.csv')
                 self.today = '2018/1/2'
 
