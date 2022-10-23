@@ -263,19 +263,19 @@ def test(MODEL_TEST):
 
 # 全局参数：根据不同的测试任务进行修改
 TEST_STOCK_NUM = 15             # 测试多少股票（zz500共有453支）
-MODEL_PATH = 'ppo_test'        # 保存模型名称，最新命名方式：算法+参数（迭代次数）+用哪年训练的
-MODEL_TEST = '_final_timesteps'      # 想要测试哪个模型，可选'_best_model', '_final_timesteps', '_14400_timesteps'
-TRAIN_OR_NOT = True           # False代表只测试现有模型，True要训练并测试新的模型
+MODEL_PATH = 'td3_test'        # 保存模型名称，最新命名方式：算法+参数（迭代次数）+用哪年训练的
+MODEL_TEST = '_best_model'      # 想要测试哪个模型，可选'_best_model', '_final_timesteps', '_14400_timesteps'
+TRAIN_OR_NOT = True    # False代表只测试现有模型，True要训练并测试新的模型
 DT = {
     'train': 'local',
     'val': 'local',
     'test': 'local',
 }
 PARAM = {
-    'algo': 'ppo',      # 'ppo', 'td3', 'ddpg'
+    'algo': 'td3',      # 'ppo', 'td3', 'ddpg'
     'total_time_step': 40000,
-    'learning_starts': 5000,
-    'batch_size': 10240,
+    'learning_starts': 20000,
+    'batch_size': 2048,
     'seed': 1,
     'seq_time': 48,     # 每个episode跑多少步（每个episode有多少个timestep）
     'eval_freq': 480,   # 多少个timestep测一次

@@ -140,20 +140,21 @@ class ENV(gym.Env):
         return state
 
     def get_reward(self, profit):
-        reward = 0
-        if 0 < profit <= 0.1:
-            reward = 1
-        if 0.1 < profit <= 0.2:
-            reward = 2
-        if 0.2 <= profit:
-            reward = 4
-        if -0.1 <= profit < 0:
-            reward = -1
-        if -0.2 <= profit < -0.1:
-            reward = -2
-        if profit < -0.2:
-            reward = -4
-        return reward
+        # reward = 0
+        # if 0 < profit <= 0.1:
+        #     reward = 1
+        # if 0.1 < profit <= 0.2:
+        #     reward = 2
+        # if 0.2 <= profit:
+        #     reward = 4
+        # if -0.1 <= profit < 0:
+        #     reward = -1
+        # if -0.2 <= profit < -0.1:
+        #     reward = -2
+        # if profit < -0.2:
+        #     reward = -4
+        # return reward
+        return profit
 
     def step(self, action):
         action = action[0]
@@ -226,7 +227,6 @@ class ENV(gym.Env):
         if sp_std<10e-4:
             sp_std=10e-4
         self.sp = (np.mean(self.profit_list))/sp_std          # 最后输出全时间段的夏普率（无风险利率3%）
-
         # _r = np.log(self.profit_list).diff()
         # self.sp = _r.mean()/(_r.std() + 1e-10)
 
@@ -240,14 +240,15 @@ class ENV(gym.Env):
             self.mdd = np.max(step_mdd_list)  # 计算最大回撤
             self.romad = self.profit/self.mdd
 
-        reward = self.get_reward(self.sp)
+        # reward = self.get_reward(self.sp)
+        reward = self.get_reward((self.Portfolio_unit-1)*100)
 
         # 检查测试中采用的策略
-        # if self.istest:
-            # 全部信息
-            # print('trade_date: {}, action: {:.3f}, inventory: {}, cost per stock: {:.3f}, L: {}, money: {:.3f}, stock price: {:.3f}, profit: {:.3f}， portfolio unit: {:.3f}'
-            #              .format(self.trade_date+self.t, action, self.inventory, costing/100, L, self.total_money, self.close1.iloc[self.trade_date + self.t], self.profit, self.Portfolio_unit))
-            # 资产价值趋势
-            # print('trade_date: {}, action: {:.3f}, L: {}, portfolio unit: {:.3f}'
-            #              .format(self.trade_date+self.t, action, L, self.Portfolio_unit))
+        # if self.util == 'test':
+        #     #全部信息
+        #     # print('trade_date: {}, action: {:.3f}, inventory: {}, cost per stock: {:.3f}, L: {}, money: {:.3f}, stock price: {:.3f}, profit: {:.3f}， portfolio unit: {:.3f}'
+        #     #              .format(self.trade_date+self.t, action, self.inventory, costing/100, L, self.total_money, self.close1.iloc[self.trade_date + self.t], self.profit, self.Portfolio_unit))
+        #     #资产价值趋势
+        #     print('trade_date: {}, action: {:.3f}, L: {}, portfolio unit: {:.3f}'
+        #                  .format(self.trade_date+self.t, action, L, self.Portfolio_unit))
         return state, reward, done, {}
